@@ -24,11 +24,6 @@ def niceprint(string):
     print(out)
 
 
-# c.execute('select * from profiles')
-# c.execute('''CREATE TABLE profiles
-#              (id integer PRIMARY KEY, username text, name text)''')
-# c.execute("insert into profiles  values ('sasha', 'masha')")
-
 bot = telebot.TeleBot("421498566:AAElg4npwqhJdWZfFh9Ze2SRblb6f6og30Q")
 admins = ['Vozhik', 'Hedina69', 'belaya_devushka', 'danilsolo']
 
@@ -37,26 +32,44 @@ def send_welcome(message):
     id = message.from_user.id
     username = message.from_user.username
 
-    conn = sqlite3.connect('example.db')
+    conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
-    querry = "insert into profiles values ('" + str(id) + "', '" + str(username) + "', NULL)"
-    logging.debug(querry)
+    querry = "insert into profiles (id, username) values ('{}', '{}')".format(id, username)
+    # querry = "insert into profiles (id, username) values ('" + str(id) + "', '" + str(username) + "')"
+    logging.debug('new: ' + str(username))
     c.execute(querry)
     conn.commit()
     conn.close()
 
+    bot.send_message(message.chat.id, 'Вы зарегистрированы')
+
 @bot.message_handler(commands=['getall'])
 def getallusers(message):
 
-    conn = sqlite3.connect('example.db')
+    conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
     querry = "select * from profiles"
+    logging.debug(querry)
+    for i in c.execute(querry):
+        logging.debug(str(i))
+        bot.send_message(message.chat.id, str(i))
+    conn.commit()
+    conn.close()
+
+
+@bot.message_handler(commands=['dellall'])
+def getallusers(message):
+
+    conn = sqlite3.connect('wwbot.db')
+    c = conn.cursor()
+    querry = "delete from profiles"
     logging.debug(querry)
     for i in c.execute(querry):
         logging.debug(str(i))
         bot.send_message(BOTCHAT, str(i))
     conn.commit()
     conn.close()
+
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def getprofile(message):
@@ -130,32 +143,70 @@ def getprofile(message):
                 logging.debug('hero wins: ' + str(herowins))
 
             if param in inventory.swords:
+                herosword = str(param)
                 logging.debug('sword: ' + str(param))
 
             if param in inventory.dagger:
-                logging.debug('dugger: ' + str(param))
+                herosdagger = str(param)
+                logging.debug('dagger: ' + str(param))
 
             if param in inventory.head:
+                herohead = str(param)
                 logging.debug('head: ' + str(param))
 
             if param in inventory.arms:
+                heroarms = str(param)
                 logging.debug('arms: ' + str(param))
 
             if param in inventory.body:
+                herobody = str(param)
                 logging.debug('body: ' + str(param))
 
             if param in inventory.legs:
+                herolegs = str(param)
                 logging.debug('legs: ' + str(param))
 
             if param in inventory.specials:
+                herospecials = str(param)
                 logging.debug('specials: ' + str(param))
-
-            if param[0:1] == '🎽':
-                None
 
             if param[0:1] == '📦':
                 herostock = param.split()[1]
                 logging.debug('hero stock: ' + str(herostock))
+
+            if param[0:2] in inventory.pets:
+                pet = param
+                logging.debug('pet: ' + str(pet))
+
+        querry ='''uodate profiles
+        set heroflag = {1},
+            heroname = {2}
+
+        '''
+            # querry = '''
+            # CREATE TABLE profiles(
+            #     id integer PRIMARY KEY,
+            #     username text default null,
+            #     heroflag text default null,
+            #     heroname text default null,
+            #     prof text default null,
+            #     attack integer default 0,
+            #     defense integer default 0,
+            #     exp integer default 0,
+            #     stamina integer default 0,
+            #     gold integer default 0,
+            #     gems integer default 0,
+            #     wins integer default 0,
+            #     sword text default null,
+            #     dagger text default null,
+            #     head text default null,
+            #     arms text default null,
+            #     body text default null,
+            #     legs text default null,
+            #     specials text default null,
+            #     stock integer default 0,
+            #     pet text default null
+            # )'''
 
         #
         # heroflag = heroinfo[0][:2]
@@ -206,7 +257,7 @@ def getprofile(message):
         c = conn.cursor()
         querry = "update profiles set name = " + str()
         logging.debug(querry)
-
+        #c.execute(querry)
         conn.commit()
         conn.close()
 
