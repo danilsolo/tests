@@ -28,15 +28,16 @@ def niceprint(string):
 bot = telebot.TeleBot("421498566:AAElg4npwqhJdWZfFh9Ze2SRblb6f6og30Q")
 admins = ['Vozhik', 'Hedina69', 'belaya_devushka', 'danilsolo']
 
-@bot.message_handler(commands=['start'])
+
+@bot.message_handler(commands=['startt'])
 def send_welcome(message):
     userid = message.from_user.id
     username = message.from_user.username
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
+
     querry = "insert into profiles (id, username) values ('{}', '{}')".format(userid, username)
-    # querry = "insert into profiles (id, username) values ('" + str(id) + "', '" + str(username) + "')"
     logging.debug('new: ' + str(username))
     c.execute(querry)
     conn.commit()
@@ -44,12 +45,49 @@ def send_welcome(message):
 
     bot.send_message(message.chat.id, 'Вы зарегистрированы')
 
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    userid = message.from_user.id
+    username = message.from_user.username
+
+    conn = sqlite3.connect('wwbot.db')
+    c = conn.cursor()
+    res = c.execute('select username from profiles where id = {}'.format(userid))
+    if res:
+        for i in res:
+            logging.debug(':' + str(i))
+        bot.send_message(message.chat.id, 'Вы уже зарегистрированы')
+        conn.commit()
+        conn.close()
+    else:
+        querry = "insert into profiles (id, username) values ('{}', '{}')".format(userid, username)
+        logging.debug('new: ' + str(username))
+        c.execute(querry)
+        conn.commit()
+        conn.close()
+
+        bot.send_message(message.chat.id, 'Вы зарегистрированы')
+
 @bot.message_handler(commands=['getall'])
 def getallusers(message):
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
     querry = "select * from profiles"
+    logging.debug(querry)
+    for i in c.execute(querry):
+        logging.debug(str(i))
+        bot.send_message(message.chat.id, str(i))
+    conn.commit()
+    conn.close()
+
+@bot.message_handler(commands=['getme'])
+def getallusers(message):
+
+    conn = sqlite3.connect('wwbot.db')
+    c = conn.cursor()
+    querry = "select * from profiles where id = {}".format(message.from_user.id)
     logging.debug(querry)
     for i in c.execute(querry):
         logging.debug(str(i))
@@ -94,7 +132,7 @@ def getprofile(message):
                 logging.debug('heroname: ' + str(heroname))
                 logging.debug('hero prof: ' + str(heroprof))
 
-            if param[0:1] == '🏅':
+            if param[0:2] == '🏅У':
                 herolevel = param.split()[1]
                 logging.debug('hero level: ' + str(herolevel))
 
