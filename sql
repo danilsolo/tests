@@ -9,6 +9,7 @@ CREATE TABLE profiles(
     defense integer default 0,
     exp integer default 0,
     stamina integer default 0,
+    mana integer default 0,
     gold integer default 0,
     gems integer default 0,
     wins integer default 0,
@@ -22,3 +23,10 @@ CREATE TABLE profiles(
     stock integer default 0,
     pet text default null
 )'''
+
+
+        conn = sqlite3.connect('example.db')
+        c = conn.cursor()
+        #c.execute(querry)
+        conn.commit()
+        conn.close()

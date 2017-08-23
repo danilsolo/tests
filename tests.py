@@ -30,12 +30,12 @@ admins = ['Vozhik', 'Hedina69', 'belaya_devushka', 'danilsolo']
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    id = message.from_user.id
+    userid = message.from_user.id
     username = message.from_user.username
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
-    querry = "insert into profiles (id, username) values ('{}', '{}')".format(id, username)
+    querry = "insert into profiles (id, username) values ('{}', '{}')".format(userid, username)
     # querry = "insert into profiles (id, username) values ('" + str(id) + "', '" + str(username) + "')"
     logging.debug('new: ' + str(username))
     c.execute(querry)
@@ -77,27 +77,10 @@ def getprofile(message):
     # niceprint(str(message))
     # print(str(message.from_user.username) + ': ' + message.text)
     # print(message.text.split('\n'))
-
+    userid = message.from_user.id
 
     if '/class' in message.text:
         # niceprint(message.text)
-
-        # ['🇮🇲Петя, Добытчик Красного замка',
-        # '🏅Уровень: 20',
-        # '⚔Атака: 3 🛡Защита: 21',
-        # '🔥Опыт: 5828/6719',
-        # '🔋Выносливость: 5/5',
-        # '💧Мана: 200/200',
-        # '💰0 💠3',
-        # '🤺Побед: 0',
-        # '',
-        # '🎽Экипировка +3⚔️+4🛡+3⛏:',
-        # 'Кирка шахтера +3⚔️ +3🛡 +3⛏',
-        # 'Деревянный щит +1🛡',
-        # '',
-        # '🎒Рюкзак: 1/15 /inv',
-        # '📦Склад: 4952 /stock',
-        # '🏛Твои умения: /class']
 
         heroinfo = message.text.split('\n')
 
@@ -129,6 +112,7 @@ def getprofile(message):
                 herostamina = param.split()[1].split('/')[0]
                 logging.debug('hero stamina: ' + str(herostamina))
 
+            heromana = 0
             if param[0:1] == '💧':
                 heromana = param.split()[1].split('/')[0]
                 logging.debug('mana: ' + str(heromana))
@@ -179,86 +163,37 @@ def getprofile(message):
                 pet = param
                 logging.debug('pet: ' + str(pet))
 
-        querry ='''uodate profiles
-        set heroflag = {1},
-            heroname = {2}
-
-        '''
-            # querry = '''
-            # CREATE TABLE profiles(
-            #     id integer PRIMARY KEY,
-            #     username text default null,
-            #     heroflag text default null,
-            #     heroname text default null,
-            #     prof text default null,
-            #     attack integer default 0,
-            #     defense integer default 0,
-            #     exp integer default 0,
-            #     stamina integer default 0,
-            #     gold integer default 0,
-            #     gems integer default 0,
-            #     wins integer default 0,
-            #     sword text default null,
-            #     dagger text default null,
-            #     head text default null,
-            #     arms text default null,
-            #     body text default null,
-            #     legs text default null,
-            #     specials text default null,
-            #     stock integer default 0,
-            #     pet text default null
-            # )'''
-
-        #
-        # heroflag = heroinfo[0][:2]
-        # heroname = heroinfo[0].split()[0][2:-1]
-        # heroprof = heroinfo[0].split()[1]
-        # herolevel = heroinfo[1].split()[1]
-        # logging.debug('heroflag: ' + heroflag)
-        # logging.debug('heroname: ' + str(heroname))
-        # logging.debug('hero prof: ' + str(heroprof))
-        # logging.debug('hero level: ' + str(herolevel))
-        #
-        # heroattack = heroinfo[2].split()[1]
-        # herodefense = heroinfo[2].split()[3]
-        # logging.debug('hero attack: ' + str(heroattack))
-        # logging.debug('hero defense: ' + str(herodefense))
-        #
-        # heroexp = heroinfo[3].split()[1].split('/')[0]
-        # logging.debug('hero exp: ' + str(heroexp))
-        #
-        # herostamina = heroinfo[4].split()[1].split('/')[0]
-        # logging.debug('hero stamina: ' + str(herostamina))
-        #
-        # if heroprof in ('Добытчик', 'Кузнец'):
-        #     heromana = heroinfo[5].split()[1].split('/')[0]
-        #     logging.debug('mana: ' + str(heromana))
-        #
-        #     herogold = heroinfo[6].split()[0][1:]
-        #     herogems = heroinfo[6].split()[1][1:]
-        #     logging.debug('hero gold: ' + str(herogold))
-        #     logging.debug('hero gems: ' + str(herogems))
-        #
-        #     herowins = heroinfo[7].split()[1]
-        #     logging.debug('hero wins: ' + str(herowins))
-        # else:
-        #     herogold = heroinfo[5].split()[0][1:]
-        #     herogems = heroinfo[5].split()[1][1:]
-        #     logging.debug('hero gold: ' + str(herogold))
-        #     logging.debug('hero gems: ' + str(herogems))
-        #
-        #     herowins = heroinfo[6].split()[1]
-        #     logging.debug('hero wins: ' + str(herowins))
+        querry ='''update profiles
+        set heroflag = '{1}',
+            heroname = '{2}',
+            prof = '{3}',
+            attack = '{4}',
+            defense = '{5}',
+            exp = '{6}',
+            stamina = '{7}',
+            mana = '{8}',
+            gold = '{9}',
+            gems = '{10}',
+            wins = '{11}',
+            sword = '{12}',
+            dagger = '{13}',
+            head = '{14}',
+            arms = '{15}',
+            body = '{16}',
+            legs = '{17}',
+            specials = '{18}',
+            stock = '{19}',
+            pet = '{20}'
+        where id = {21}
+        '''.format(heroflag, heroname, heroprof, herolevel, heroattack, herodefense, heroexp, herostamina, heromana,
+                   herogold, herogems, herowins, herosword, herosdagger, herohead, heroarms, herobody, herolegs,
+                   herospecials, herostock, pet, userid)
 
 
-
-
-
-        conn = sqlite3.connect('example.db')
+        conn = sqlite3.connect('wwbot.db')
         c = conn.cursor()
-        querry = "update profiles set name = " + str()
         logging.debug(querry)
-        #c.execute(querry)
+        c.execute(querry)
         conn.commit()
         conn.close()
 
