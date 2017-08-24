@@ -2,6 +2,7 @@ import telebot
 import inventory
 import sqlite3
 import logging
+import time
 
 BOTCHAT = 76201733
 logging.basicConfig(format = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = logging.DEBUG)
@@ -21,7 +22,7 @@ def niceprint(string):
             tabindex -= 1
             out += '\n'
         out += i
-    print(out)
+    return out
 
 
 
@@ -29,34 +30,20 @@ bot = telebot.TeleBot("421498566:AAElg4npwqhJdWZfFh9Ze2SRblb6f6og30Q")
 admins = ['Vozhik', 'Hedina69', 'belaya_devushka', 'danilsolo']
 
 
-@bot.message_handler(commands=['startt'])
-def send_welcome(message):
-    userid = message.from_user.id
-    username = message.from_user.username
-
-    conn = sqlite3.connect('wwbot.db')
-    c = conn.cursor()
-
-    querry = "insert into profiles (id, username) values ('{}', '{}')".format(userid, username)
-    logging.debug('new: ' + str(username))
-    c.execute(querry)
-    conn.commit()
-    conn.close()
-
-    bot.send_message(message.chat.id, 'Вы зарегистрированы')
-
-
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     userid = message.from_user.id
     username = message.from_user.username
+    logging.debug('user: ' + str(username) + ' command: /start')
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
-    res = c.execute('select username from profiles where id = {}'.format(userid))
-    if res:
-        for i in res:
-            logging.debug(':' + str(i))
+
+    userlist = []
+    for row in c.execute('select username from profiles'):
+        userlist.append(row[0])
+
+    if username in userlist:
         bot.send_message(message.chat.id, 'Вы уже зарегистрированы')
         conn.commit()
         conn.close()
@@ -71,6 +58,7 @@ def send_welcome(message):
 
 @bot.message_handler(commands=['getall'])
 def getallusers(message):
+    logging.debug('user: ' + str(message.from_user.username) + ' command: /getall')
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
@@ -84,6 +72,7 @@ def getallusers(message):
 
 @bot.message_handler(commands=['getme'])
 def getallusers(message):
+    logging.debug('user: ' + str(message.from_user.username) + ' command: /getme')
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
@@ -98,6 +87,7 @@ def getallusers(message):
 
 @bot.message_handler(commands=['dellall'])
 def getallusers(message):
+    logging.debug('user: ' + str(message.from_user.username) + ' command: /dellall')
 
     conn = sqlite3.connect('wwbot.db')
     c = conn.cursor()
@@ -112,15 +102,35 @@ def getallusers(message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def getprofile(message):
-    # niceprint(str(message))
+    # logging.debug(niceprint(str(message)))
+    # logging.debug(time.time())
     # print(str(message.from_user.username) + ': ' + message.text)
     # print(message.text.split('\n'))
     userid = message.from_user.id
+    username = message.from_user.username
 
-    if '/class' in message.text:
+    conn = sqlite3.connect('wwbot.db')
+    c = conn.cursor()
+
+    userlist = []
+    for row in c.execute('select username from profiles'):
+        userlist.append(row[0])
+    conn.commit()
+    conn.close()
+
+    if '/class' in message.text and '🇨🇾' in message.text and message.forward_from.id == 265204902 and username in userlist:# and message.forward_date > time.time() - 60:
+        logging.debug('пользователь: ' + str(message.from_user.username) + ' прислал профиль')
         # niceprint(message.text)
 
         heroinfo = message.text.split('\n')
+        herosword = ''
+        herosdagger = ''
+        herohead = ''
+        heroarms = ''
+        herobody = ''
+        herolegs = ''
+        herospecials = ''
+        pet = ''
 
         for param in heroinfo:
             # logging.debug(param)
@@ -167,31 +177,31 @@ def getprofile(message):
 
             if param in inventory.swords:
                 herosword = str(param)
-                logging.debug('sword: ' + str(param))
+                logging.debug('sword: ' + str(herosword))
 
             if param in inventory.dagger:
                 herosdagger = str(param)
-                logging.debug('dagger: ' + str(param))
+                logging.debug('dagger: ' + str(herosdagger))
 
             if param in inventory.head:
                 herohead = str(param)
-                logging.debug('head: ' + str(param))
+                logging.debug('head: ' + str(herohead))
 
             if param in inventory.arms:
                 heroarms = str(param)
-                logging.debug('arms: ' + str(param))
+                logging.debug('arms: ' + str(heroarms))
 
             if param in inventory.body:
                 herobody = str(param)
-                logging.debug('body: ' + str(param))
+                logging.debug('body: ' + str(herobody))
 
             if param in inventory.legs:
                 herolegs = str(param)
-                logging.debug('legs: ' + str(param))
+                logging.debug('legs: ' + str(herolegs))
 
             if param in inventory.specials:
                 herospecials = str(param)
-                logging.debug('specials: ' + str(param))
+                logging.debug('specials: ' + str(herospecials))
 
             if param[0:1] == '📦':
                 herostock = param.split()[1]
@@ -236,6 +246,14 @@ def getprofile(message):
         conn.close()
 
         bot.send_message(message.chat.id, 'Профиль обновлен')
+
+    else:
+        logging.debug('пользователь: ' + str(message.from_user.username) + ' прислал дерьмовый профиль')
+        logging.debug(niceprint(str(message)))
+        if username in userlist:
+            bot.send_message(message.from_user.id, 'Ты отсылаешь мне какую-то дичь')
+        else:
+            bot.send_message(message.from_user.id, 'Ты отсылаешь мне какую-то дичь попробуй написать /start')
 
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
