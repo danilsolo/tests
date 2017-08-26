@@ -3,6 +3,7 @@ import inventory
 import sqlite3
 import logging
 import time
+import datetime
 
 BOTCHAT = 76201733
 logging.basicConfig(format = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = logging.DEBUG)
@@ -64,9 +65,27 @@ def getallusers(message):
     c = conn.cursor()
     querry = "select * from profiles"
     logging.debug(querry)
+    out = ''
     for i in c.execute(querry):
-        logging.debug(str(i))
-        bot.send_message(message.chat.id, str(i))
+        out += '@' + str(i[1]) + ' | ' + str(i[2]) + ' | ' + str(i[3]) + '\n'
+        out += '🏅' + str(i[4]) + ' ⚔' + str(i[5]) + ' 🛡' + str(i[6]) + ' 🔥' + str(i[7]) + ' 🤺' + str(i[8]) + '\n'
+        out += '<code>🤛🏻</code>' + str(i[13]) + '\n'
+        out += '<code>🤜🏻</code>' + str(i[14]) + '\n'
+        out += '<code>🎩</code>' + str(i[15]) + '\n'
+        out += '<code>👐🏻</code>' + str(i[16]) + '\n'
+        out += '<code>👕</code>' + str(i[17]) + '\n'
+        out += '<code>👢</code>' + str(i[18]) + '\n'
+        out += '<code>🌂</code>' + str(i[19]) + '\n'
+        if str(i[21]) == '':
+            out += '🌿\n'
+        else:
+            out += str(i[21]) + '\n'
+
+        out += '📦' + str(i[20]) + '\n'
+        out += '🕐' + str(i[22]) + '\n\n'
+
+    logging.debug(out)
+    bot.send_message(message.chat.id, out, parse_mode='HTML')
     conn.commit()
     conn.close()
 
@@ -80,7 +99,23 @@ def getallusers(message):
     logging.debug(querry)
     for i in c.execute(querry):
         logging.debug(str(i))
-        bot.send_message(message.chat.id, str(i))
+
+        out = '@' + str(i[1]) + ' | ' + str(i[2]) + ' | ' + str(i[3]) + '\n'
+        out += '🏅' + str(i[4]) + ' ⚔' + str(i[5]) + ' 🛡' + str(i[6]) + ' 🔥' + str(i[7]) + ' 🤺' + str(i[8]) + '\n'
+        out += '<code>🤛🏻</code>' + str(i[13]) + '\n'
+        out += '<code>🤜🏻</code>' + str(i[14]) + '\n'
+        out += '<code>🎩</code>' + str(i[15]) + '\n'
+        out += '<code>👐🏻</code>' + str(i[16]) + '\n'
+        out += '<code>👕</code>' + str(i[17]) + '\n'
+        out += '<code>👢</code>' + str(i[18]) + '\n'
+        out += '<code>🌂</code>' + str(i[19]) + '\n'
+        out += str(i[21]) + '\n'
+
+        out += '📦' + str(i[20]) + '\n'
+        out += '🕐' + str(i[22])[:-7] + '\n'
+
+        bot.send_message(message.chat.id, out,  parse_mode='HTML')
+        # bot.send_message(message.chat.id, str(i))
     conn.commit()
     conn.close()
 
@@ -231,11 +266,12 @@ def getprofile(message):
             legs = '{17}',
             specials = '{18}',
             stock = '{19}',
-            pet = '{20}'
+            pet = '{20}',
+            proftime = '{22}'
         where id = {21}
         '''.format(heroflag, heroname, heroprof, herolevel, heroattack, herodefense, heroexp, herostamina, heromana,
                    herogold, herogems, herowins, herosword, herosdagger, herohead, heroarms, herobody, herolegs,
-                   herospecials, herostock, pet, userid)
+                   herospecials, herostock, pet, userid, datetime.datetime.now())
 
 
         conn = sqlite3.connect('wwbot.db')
